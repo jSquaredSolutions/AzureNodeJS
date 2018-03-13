@@ -1,13 +1,80 @@
-<!doctype HTML>
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>
-      Index
-    </title>
-  </head>
-  <body>
-    <h1>
-      Hello! Now you know how to serve HTML files using Node.js!!!
-    </h1>
-  </body>
+<head>
+    <title></title>
+    <meta charset="utf-8" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+</head>
+<body>
+
+    <p>
+        I created this project to show how to use JavaScript to get and access token and then make a cross-origin call to my development
+        Sharepoint site. I passed in the bearer token with the ajax request.
+    </p>
+    <p> First run this function: requestToken() and then: ABCtoken = document.URL.split('=')[1].split('&')[0] and then: getAlllist(ABCtoken)</p>
+    <p>YouTube video: Demo: ADAL Azure and JavaScript Authentication https://www.youtube.com/watch?v=GpP0HwpI53c </p>
+
+    <script type="text/javascript">
+
+     ABCtoken = document.URL.split('=')[1].split('&')[0]; // pass this token in when you get it via redirect
+
+     function getAlllist(ABCtoken) {
+         $.ajax({
+             url: "https://sharepointsource123.sharepoint.com/_api/web/lists",
+             type: "GET",
+             headers: { "Accept": "application/json; odata=verbose", "Authorization": "Bearer " + ABCtoken },
+             success: successHandler,
+             error: errorHandler
+         });
+
+         function successHandler(data) {
+             $.each(data.d.results, function (i, item) {
+                 console.log(item.Title);
+             });
+         }
+
+         function errorHandler(error) {
+             console.log(error);
+         }
+     };
+
+
+     /*       -I decided not to use XMLHttpRequest, but instead use $.ajax-
+
+              var xhr = new XMLHttpRequest();
+              xhr.open("GET", getEndpointUrl());
+              xhr.setRequestHeader("authorization", "Bearer " + token);
+              xhr.setRequestHeader("accept", "application/json");
+              xhr.onload = function () {
+                 // CORS is working.
+                 console.log("Browser is CORS compatible.");
+              }
+              xhr.send();
+        var token = urlParameterExtraction.queryStringParameters['access_token'];
+     */
+
+        // Constructs the authentication URL and directs the user to it.
+        function requestToken() {
+          // Change clientId and replyUrl to reflect your app's values
+          // found on the Configure tab in the Azure Management Portal.
+          var clientId = '03bf315b-f7b4-4fdf-ae48-af940ad4f2ca';
+          var replyUrl = 'https://nodejssquared.azurewebsites.net/';
+          var resource = "https://sharepointsource123.sharepoint.com";
+
+          var authServer = 'https://login.windows.net/sharepointsource123.onmicrosoft.com/oauth2/authorize?';
+            // https://login.windows.net/common/oauth2/authorize? <- use this URL struture if it's multi-tenent
+          var endpointUrl = "https://sharepointsource123.sharepoint.com/web/lists";
+
+          var responseType = 'token';
+
+          var url = authServer +
+                    "response_type=" + encodeURI(responseType) + "&" +
+                    "client_id=" + encodeURI(clientId) + "&" +
+                    "resource=" + encodeURI(resource) + "&" +
+                    "redirect_uri=" + encodeURI(replyUrl);
+
+          window.location = url;
+        }
+    </script>
+</body>
 </html>
